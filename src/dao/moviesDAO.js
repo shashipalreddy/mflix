@@ -46,8 +46,10 @@ export default class MoviesDAO {
   static async getMoviesByCountry(countries) {
     /**
     Ticket: Projection
+
     Write a query that matches movies with the countries in the "countries"
     list, but only returns the title and _id of each movie.
+
     Remember that in MongoDB, the $in operator can be used with a list to
     match one or more values of a specific field.
     */
@@ -59,8 +61,7 @@ export default class MoviesDAO {
       // and _id. Do not put a limit in your own implementation, the limit
       // here is only included to avoid sending 46000 documents down the
       // wire.
-      cursor = await movies.find(
-        {countries : {$in : countries} }).project({ title: 1 })
+      cursor = await movies.find({countries:{ $in:countries}}).project({title:1})
     } catch (e) {
       console.error(`Unable to issue find command, ${e}`)
       return []
@@ -89,7 +90,7 @@ export default class MoviesDAO {
    * @returns {QueryParams} The QueryParams for cast search
    */
   static castSearchQuery(cast) {
-    const searchCast = Array.isArray(cast) ? cast : Array(cast)
+    const searchCast = Array.isArray(cast) ? cast : cast.split(", ")
 
     const query = { cast: { $in: searchCast } }
     const project = {}
@@ -106,15 +107,16 @@ export default class MoviesDAO {
   static genreSearchQuery(genre) {
     /**
     Ticket: Text and Subfield Search
+
     Given an array of one or more genres, construct a query that searches
     MongoDB for movies with that genre.
     */
 
-    const searchGenre = Array.isArray(genre) ? genre : Array(genre)
+    const searchGenre = Array.isArray(genre) ? genre : genre.split(", ")
 
     // TODO Ticket: Text and Subfield Search
     // Construct a query that will search for the chosen genre.
-    const query = { genres : { $in: searchGenre } }
+    const query = { genres: { $in: searchGenre } }
     const project = {}
     const sort = DEFAULT_SORT
 
@@ -138,7 +140,7 @@ export default class MoviesDAO {
       throw new Error("Must specify cast members to filter by.")
     }
     const matchStage = { $match: filters }
-    const sortStage = { $sort: { "tomatoes.viewer.rating": -1 } }
+    const sortStage = { $sort: { "tomatoes.viewer.numReviews": -1 } }
     const countingPipeline = [matchStage, sortStage, { $count: "count" }]
     const skipStage = { $skip: moviesPerPage * page }
     const limitStage = { $limit: moviesPerPage }
@@ -180,9 +182,11 @@ export default class MoviesDAO {
 
     /**
     Ticket: Faceted Search
+
     Please append the skipStage, limitStage, and facetStage to the queryPipeline
     (in that order). You can accomplish this by adding the stages directly to
     the queryPipeline.
+
     The queryPipeline is a Javascript array, so you can use push() or concat()
     to complete this task, but you might have to do something about `const`.
     */
@@ -190,9 +194,6 @@ export default class MoviesDAO {
     const queryPipeline = [
       matchStage,
       sortStage,
-      skipStage,
-      limitStage,
-      facetStage
       // TODO Ticket: Faceted Search
       // Add the stages to queryPipeline in the correct order.
     ]
@@ -249,14 +250,16 @@ export default class MoviesDAO {
 
     /**
     Ticket: Paging
+
     Before this method returns back to the API, use the "moviesPerPage" and
     "page" arguments to decide the movies to display.
+
     Paging can be implemented by using the skip() and limit() cursor methods.
     */
 
     // TODO Ticket: Paging
     // Use the cursor to only return the movies that belong on the current page
-    const displayCursor = cursor.limit(moviesPerPage).skip(moviesPerPage * page)
+    const displayCursor = cursor.limit(moviesPerPage).skip(moviesPerPage*page)
 
     try {
       const moviesList = await displayCursor.toArray()
@@ -280,8 +283,10 @@ export default class MoviesDAO {
     try {
       /**
       Ticket: Get Comments
+
       Given a movie ID, build an Aggregation Pipeline to retrieve the comments
       matching that movie's ID.
+
       The $match stage is already completed. You will need to add a $lookup
       stage that searches the `comments` collection for the correct comments.
       */
@@ -299,6 +304,7 @@ export default class MoviesDAO {
     } catch (e) {
       /**
       Ticket: Error Handling
+
       Handle the error that occurs when an invalid ID is passed to this method.
       When this specific error is thrown, the method should return `null`.
       */
