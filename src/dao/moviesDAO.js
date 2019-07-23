@@ -20,7 +20,7 @@ export default class MoviesDAO {
     }
   }
 
-  /**
+  /** 
    * Retrieves the connection pool size, write concern and user roles on the
    * current client.
    * @returns {Promise<ConfigurationResult>} An object with configuration details.
